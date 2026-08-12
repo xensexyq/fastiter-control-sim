@@ -240,6 +240,81 @@ IK 成功后，C++ 生成 50 Hz 的最小加加速度关节轨迹并由 MeshCat 
 ```bash
 python examples/fr3_sim_qt.py
 python examples/fr3_sim_qt.py --mode ik
+```bash
+python examples/fr3_sim.py --mode ik \
+  --target 0.35 0.10 0.45 3.1415926 0.0 0.2
+```
+
+可用 `--posture-gain` 修改零空间 home 姿态约束强度；程序启动或求解时会打印当前值：
+
+```bash
+python examples/fr3_sim.py --mode ik \
+  --target 0.35 0.10 0.45 \
+  --posture-gain 0.1
+```
+
+可以直接输入或拖动数值，范围为 `0 ~ 10` 。修改后会自动重新求解 IK：
+
+- `0` ：关闭零空间约束
+- `0.1` ：默认值
+- 增大：更强地趋向 home 姿态，但可能增加迭代次数
+
+IK 成功后，C++ 会生成 50 Hz 最小加加速度关节轨迹，并由 MeshCat 播放。
+
+FR3 是 7 自由度机械臂，末端位姿任务只有 6 个约束。C++ IK 默认在 Jacobian 零空间中加入 home 姿态约束，使冗余肘部姿态趋向：
+
+```text
+[0, -45, 0, -135, 0, 90, 45] deg
+```
+
+`IKOptions.posture_gain` 控制约束强度，默认值为 `0.1`；设置为 `0.0` 可关闭零空间姿态约束。求解器会先收敛末端任务，进入位姿容差后再尽量优化零空间姿态，因此不会降低远距离目标的主任务优先级。较大的增益可能增加迭代次数；通常使用默认值即可。
+
+### Qt 滑条控制
+
+启动 Qt 控制面板和 MeshCat：
+
+```bash
+python examples/fr3_sim_qt.py
+```
+
+窗口包含两个页签：
+
+- `FK - Joint sliders`：拖动 `joint1` 到 `joint7`，单位为度；范围直接来自 C++ 模型中的关节限位。
+- `IK - XYZ / RPY sliders`：拖动 `x/y/z`（米）和 `roll/pitch/yaw`（弧度）；Qt 默认以最高 30 Hz 读取最新目标调用 C++ IK，并以 60 Hz 对关节显示做最小加加速度插值，因此连续拖动时也会持续跟随。
+- IK 页签中的 `posture_gain (null-space)` 可直接编辑零空间 home 姿态约束强度；改动后会自动重新求解，设置为 `0` 可关闭约束。
+
+IK 页签以上一次成功解作为下一次求解初值。不可达目标会显示红色错误信息，并保持机器人上一次成功姿态不变。IK 成功后，FK 页签的关节滑条显示最新求解目标；MeshCat 中的机器人则显示正在插值的姿态。
+
+Qt 层的跟随速度可以单独调节，不会修改 IK 算法：
+
+```bash
+python examples/fr3_sim_qt.py --mode ik \
+  --ik-update-hz 30 --render-hz 60 --smooth-time 0.12
+```
+
+`--smooth-time` 越小响应越快，越大视觉越柔和；设置为 `0` 可恢复求解后直接跳到新姿态。
+
+调节建议：
+
+- 更灵敏：--smooth-time `0.08`
+- 更柔和：--smooth-time `0.18`
+- 禁用平滑：--smooth-time `0`
+
+默认打开 FK 页签；直接打开 IK 页签：
+
+```bash
+python examples/fr3_sim_qt.py --mode ik
+```
+
+也可以在命令行指定初始零空间约束增益，之后仍可在 IK 页签中继续修改：
+
+```bash
+python examples/fr3_sim_qt.py --mode ik --posture-gain 0.1
+```
+
+只运行 Qt 控制面板、不启动 MeshCat：
+
+```bash
 python examples/fr3_sim_qt.py --no-meshcat
 ```
 
