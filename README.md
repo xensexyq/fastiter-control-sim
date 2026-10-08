@@ -451,11 +451,18 @@ Linux 环境若曾执行过 ROS `setup.bash`，重新激活 `fr3sim`，并确保
 pip 负责 Python 包和当前项目的 C++ 扩展构建；Pinocchio、Eigen、urdfdom、tinyxml2
 等 ABI 敏感的 C++ 依赖必须由对应平台的 conda-forge 或 Visual Studio 工具链提供。
 
-## 致谢
+## 致谢与许可
 
-原项目：[xensedyl/fastiter-control-sim](https://github.com/xensedyl/fastiter-control-sim)。现有 MIT 许可证保留原作者 dongyaolin 的署名。Franka 模型来源及授权见下方许可证说明。
+<a id="致谢"></a>
 
-## 许可证
+### 致谢与参考项目
+
+原项目：[xensedyl/fastiter-control-sim](https://github.com/xensedyl/fastiter-control-sim)。现有 MIT 许可证保留原作者 dongyaolin 的署名。
+
+- Pinocchio、pybind11：分别提供 C++ 运动学与 Python 绑定；MeshCat / Qt 用于可视化。依赖配置见 [pyproject.toml](pyproject.toml) 与 [environment.yml](environment.yml)。
+- [Franka franka_description](https://github.com/frankarobotics/franka_description)：官方模型和网格来源，获取方法见 [模型资源说明](#官方模型和网格资源)。
+
+### 许可证
 
 本项目源代码采用 [MIT License](LICENSE)。由 Franka 官方 `franka_description` 生成的
 模型和网格仍遵循其原始 Apache-2.0 许可证。
